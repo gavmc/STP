@@ -6,7 +6,9 @@
 #include <string.h>
 #include <time.h>
 #include <Windows.h>
+#include <fstream>
 
+using namespace std;
 
 int** place_bot_pieces();
 int** place_player_pieces();
@@ -14,6 +16,9 @@ int* bot_move(int[6][6]);
 int* player_move(int[6][6]);
 
 int game_loop();
+
+int* get_stats();
+void put_stats(int[4]);
 
 int menu_touch();
 int back_touch(int);
@@ -28,7 +33,7 @@ bool position_in_array(int, int, int);
 int boat_sizes[] = {4, 3, 2, 1};
 
 
-class Draw
+class Draw //class that contains all draw functions
 {
     public:
         Draw();
@@ -81,16 +86,16 @@ int game_loop(){
 
     int** bot_board_temp;
     int** player_board_temp;
-    int bot_board[6][6];
-    int player_board[6][6];
-    int bot_view[6][6];
-    int player_view[6][6];
+    int bot_board[6][6]; // initalize bot board
+    int player_board[6][6]; // initalize player board
+    int bot_view[6][6]; // initalize bot view
+    int player_view[6][6]; // initalize player view
 
 
-    player_board_temp = place_player_pieces();
-    bot_board_temp = place_bot_pieces();
+    player_board_temp = place_player_pieces(); // let the player place pieces
+    bot_board_temp = place_bot_pieces(); // place the bot pieces
 
-    for(int i=0; i<6; i++){
+    for(int i=0; i<6; i++){ // copy the bot + player boards from type int** to 2D arrays.
         for(int j=0; j<6; j++){
             bot_board[i][j] = bot_board_temp[i][j];
             player_board[i][j] = player_board_temp[i][j];
@@ -100,20 +105,20 @@ int game_loop(){
     }
 
 
-    int player = first_player();
+    int player = first_player(); // random first player
 
-    int turns[2] = {0, 0}; // [player, bot]
+    int turns[2] = {0, 0}; // keeps track of the number of turns for each person
 
-    while(check_winner(player_view, player_board) == 0){
+    while(check_winner(player_view, player_board) == 0){ // run through the game
         draw.board(player_view, player_board);
-        if(player == 1){
+        if(player == 1){ // bot turn
             turns[1] += 1;
             draw.turn(player);
             Sleep(1500);
             int* bot_m;
-            bot_m = bot_move(bot_view);
+            bot_m = bot_move(bot_view); // get bot move
 
-            if(player_board[bot_m[0]][bot_m[1]] == 0){
+            if(player_board[bot_m[0]][bot_m[1]] == 0){ // place bot move on board
                 bot_view[bot_m[0]][bot_m[1]] = -1;
                 player_board[bot_m[0]][bot_m[1]] = -5;
             }
@@ -122,17 +127,17 @@ int game_loop(){
                 player_board[bot_m[0]][bot_m[1]] = 5;
             }
 
-            draw.board(player_view, player_board);
+            draw.board(player_view, player_board); // update board
 
-            player *= -1;
+            player *= -1; // switch player
         }
-        else if(player == -1){
+        else if(player == -1){ // player turn
             turns[0] += 1;
             draw.turn(player);
             int* player_m;
-            player_m = player_move(player_view);
+            player_m = player_move(player_view); // get player move
 
-            if(bot_board[player_m[0]][player_m[1]] == 0){
+            if(bot_board[player_m[0]][player_m[1]] == 0){ // place player move on board
                 player_view[player_m[0]][player_m[1]] = -5;
             }
             else{
@@ -141,7 +146,7 @@ int game_loop(){
 
             int temp_player[6][6];
 
-            for(int i=0; i<6; i++){
+            for(int i=0; i<6; i++){ // change the player board to incude the bots hits/misses
                 for(int j=0; j<6; j++){
                     if(bot_view[i][j] != 0){
                         temp_player[i][j] = bot_view[i][j]*5;
@@ -152,16 +157,43 @@ int game_loop(){
                 }
             }
 
-            draw.board(player_view, temp_player);
-            player *= -1;
+            draw.board(player_view, temp_player); // update board
+            player *= -1; // switch players
         }
     }
 
+    int* stats;
+
+    int winner = check_winner(player_view, player_board);
+
+    stats = get_stats();
+
+    if(winner == 2){
+        if(turns[0] < stats[0]){
+            stats[0] = turns[0];
+        }
+        if(turns[0] > stats[1]){
+            stats[1] = turns[0];
+        }
+    }
+    if(winner == 1){
+        if(turns[0] < stats[2]){
+            stats[2] = turns[0];
+        }
+        if(turns[0] > stats[3]){
+            stats[3] = turns[0];
+        }
+    }
+
+    //int t_stats[] = {stats[0], stats[1], stats[2], stats[3]};
+
+    put_stats(stats);
+
     Sleep(1000);
 
-    draw.winner(check_winner(player_view, player_board));
+    draw.winner(winner); // draw winner screen
 
-    while(true){
+    while(true){ // wait for press on winner menu
         int choice;
         choice = winner_touch();
         if(choice == 1){
@@ -175,7 +207,7 @@ int game_loop(){
 
 }
 
-int first_player(){
+int first_player(){ // choose a random first player
     int r = Random.RandInt();
     if (r > 16000){
         return 1; // player 2 goes first
@@ -194,11 +226,11 @@ int** place_player_pieces(){
     //place size 2
     //place size 1
 
-    int current_player_board[6][6];
-    int temp_bot_board[6][6];
+    int current_player_board[6][6]; // blank player board
+    int temp_bot_board[6][6]; // blank bot board (for drawing the screen)
     int dir[2];
 
-    for(int i=0; i<6; i++){
+    for(int i=0; i<6; i++){ // set boards to zeros
         for(int j=0; j<6; j++){
             current_player_board[i][j] = 0;
             temp_bot_board[i][j] = 0;
@@ -207,7 +239,7 @@ int** place_player_pieces(){
 
     draw.board(temp_bot_board, current_player_board);
 
-    int current_ship = 1;
+    int current_ship = 1; // start with ship #1
     int x, y;
     
     
@@ -217,19 +249,19 @@ int** place_player_pieces(){
 
         }
 
-        while(LCD.Touch(&x, &y)){
+        while(LCD.Touch(&x, &y)){ // wait for touch
 
         }
 
         bool double_click = false;
         int start = time(NULL);
-        while(time(NULL) - start < .75){
+        while(time(NULL) - start < .75){ // check for double touch
             if(LCD.Touch(&x, &y)){
                 double_click = true;
             }
         }
 
-        if(double_click){
+        if(double_click){ // set placement direction depending on if there 
             dir[0] = 0;
             dir[1] = 1;
         }
@@ -245,37 +277,37 @@ int** place_player_pieces(){
 
         float cell_size[2] = {((board_right-board_left)/6), ((board_bottom-board_top)/6)}; 
         
-        if(x > board_left && x < board_right && y > board_top && y < board_bottom){
+        if(x > board_left && x < board_right && y > board_top && y < board_bottom){ //  if click on board
             int pos[2];
-            pos[0] = (x - board_left) / cell_size[0];
+            pos[0] = (x - board_left) / cell_size[0]; // get which cell is clicked
             pos[1] = (y - board_top) / cell_size[1];
 
 
             bool valid = true;
-            for(int i=0; i<boat_sizes[current_ship-1]; i++){
+            for(int i=0; i<boat_sizes[current_ship-1]; i++){ // check if the position is valid
                 if(current_player_board[pos[0]+dir[0]*i][pos[1]+dir[1]*i] != 0){
                     valid = false;
                 }
             }
             
             if(valid){
-                for(int i=0; i<boat_sizes[current_ship-1]; i++){
+                for(int i=0; i<boat_sizes[current_ship-1]; i++){ // is the position is valid, place the ship
                     current_player_board[pos[0]+(dir[0]*i)][pos[1]+(dir[1]*i)] = current_ship;
                 }
-                current_ship += 1;
+                current_ship += 1; // move to the next ship
             }
 
             draw.board(temp_bot_board, current_player_board);
         }
 
-        if(current_ship > 4){
+        if(current_ship > 4){ // end once all ships are placed
             break;
         }
     }
     
     int** player_b = 0;
 
-    player_b = new int*[6];
+    player_b = new int*[6]; // return player board as type int**
     for(int j=0; j<6; j++){
         player_b[j] = new int[6];
         for(int k=0; k<6; k++){
@@ -290,7 +322,7 @@ int** place_player_pieces(){
 int** place_bot_pieces(){ // places the bot pieces randomly
     int** bot_b = 0;
 
-    bot_b = new int*[6];
+    bot_b = new int*[6]; // 2D array of zeros
     for(int j=0; j<6; j++){
         bot_b[j] = new int[6];
         for(int k=0; k<6; k++){
@@ -337,7 +369,7 @@ int** place_bot_pieces(){ // places the bot pieces randomly
             }
         }
 
-        if(valid == true){ // places boat in position
+        if(valid == true){ // if valid, places boat in position
             for(int j=0; j<boat_sizes[i]; j++){
                 switch(dir){
                     case(0):
@@ -357,7 +389,7 @@ int** place_bot_pieces(){ // places the bot pieces randomly
             i+=1;
         }
 
-        if(i == 4){
+        if(i == 4){ // end once all boats are placed
             return bot_b;
         }
     }
@@ -371,16 +403,16 @@ int check_winner(int bot_b[6][6], int player_b[6][6]){
 
     for(int i=0; i<6; i++){
         for(int j=0; j<6; j++){
-            if(bot_b[i][j] == 5){
+            if(bot_b[i][j] == 5){ // add up the number of hits the player has
                 hits += 1;
             }
-            if(player_b[i][j] != 0 && player_b[i][j] != 5 && player_b[i][j] != -5){
+            if(player_b[i][j] != 0 && player_b[i][j] != 5 && player_b[i][j] != -5){ // check to see if any boats exist on the player board
                 bot_win = false;
             }
         }
     }
 
-    if(hits == 10){
+    if(hits == 10){ // if the player hits all ship spots
         player_win = true;
     }
 
@@ -400,7 +432,7 @@ int* bot_move(int bot_vision[6][6]){
     int prob[6][6];
     int multiplier = 2;
 
-    for(int i=0; i<6; i++){
+    for(int i=0; i<6; i++){ // 2D array of zeros
         for(int j=0; j<6; j++){
             prob[i][j] = 0;
         }
@@ -408,33 +440,33 @@ int* bot_move(int bot_vision[6][6]){
 
     for(int i=0; i<4; i++){
         for(int j=0; j<6; j++){
-            for(int k=0; k<6; k++){
-                bool valid = true;
+            for(int k=0; k<6; k++){ // for each boat, try each possible orientation and position on the board
+                bool valid = true; 
                 int ones = 0;
-                for(int l=0; l<boat_sizes[i]; l++){
-                    if(j+l > 5){
+                for(int l=0; l<boat_sizes[i]; l++){ // try the horizontal oprientation
+                    if(j+l > 5){ // if boat is out of bounds dont count it
                         valid = false;
                         break;
                     }
-                    if(bot_vision[j+l][k] == -1){
+                    if(bot_vision[j+l][k] == -1){ // if boat hits a miss spot dont count it
                         valid = false;
                         break;
                     }
-                    if(bot_vision[j+l][k] == 1){
+                    if(bot_vision[j+l][k] == 1){ // if boat touches a hit spot keep track for later
                         ones += 1;
                     }
                 }
                 if(valid){
                     for(int l=0; l<boat_sizes[i]; l++){
                         if(bot_vision[j+l][k] == 0){
-                            prob[j+l][k] += 1 + (ones*multiplier);
+                            prob[j+l][k] += 1 + (ones*multiplier); // if boat is in a valid spot add 1 to prob matrix. if touching a hit spot add a bonus
                         }
                     }
                 }
 
                 valid = true;
                 ones = 0;
-                for(int l=0; l<boat_sizes[i]; l++){
+                for(int l=0; l<boat_sizes[i]; l++){ // try the vertical orientation
                     if(k+l > 5){
                         valid = false;
                         break;
@@ -463,7 +495,7 @@ int* bot_move(int bot_vision[6][6]){
 
     pos = new int[2];
 
-    for(int i=0; i<6; i++){
+    for(int i=0; i<6; i++){ // get the position in prob matrix that has the highest value
         for(int j=0; j<6; j++){
             if(prob[i][j] > max){
                 max = prob[i][j];
@@ -473,7 +505,7 @@ int* bot_move(int bot_vision[6][6]){
         }
     }
 
-    return pos;
+    return pos; // return chosen spot
 }
 
 int* player_move(int player_vision[6][6]){
@@ -488,26 +520,55 @@ int* player_move(int player_vision[6][6]){
 
     float cell_size[2] = {((board_right-board_left)/6), ((board_bottom-board_top)/6)}; 
 
-    while(!LCD.Touch(&x, &y)){
+    while(!LCD.Touch(&x, &y)){ // wait for touch
         
     }
 
-    if(x < board_left || x > board_right || y < board_top || y > board_bottom){
-        return player_move(player_vision);
+    if(x < board_left || x > board_right || y < board_top || y > board_bottom){ 
+        return player_move(player_vision); // if touch outside of bounds, call again
     }
 
-    pos[0] = (x - board_left) / cell_size[0];
+    pos[0] = (x - board_left) / cell_size[0]; // get cell pressed
     pos[1] = (y - board_top) / cell_size[1];
 
     if(player_vision[pos[0]][pos[1]] != 0){
-        return player_move(player_vision);
+        return player_move(player_vision); // if cell is not empty, call again
     }
 
 
-    return pos;
+    return pos; // return chose position
 }
 
-bool position_in_array(int posx, int posy, int size){
+int* get_stats(){
+    ifstream file;
+    file.open("stats.txt"); // open stats file
+
+    int* stats;
+    stats = new int[4]; // [fastest win, slowest win, fastest loss, slowest loss]
+
+    file >> stats[0]; // extract stats from file
+    file >> stats[1];
+    file >> stats[2];
+    file >> stats[3];
+
+    file.close();
+
+    return stats; // return stats
+}
+
+void put_stats(int stats[4]){
+    ofstream file;
+    file.open("stats.txt"); // open file
+
+    file << stats[0] << endl; // write to file
+    file << stats[1] << endl;
+    file << stats[2] << endl;
+    file << stats[3] << endl;
+
+    file.close();
+}
+
+bool position_in_array(int posx, int posy, int size){ // checks if a given position in inside an array of size by size
     if(posx < 0 || posx >= size){
         return false;
     }
@@ -517,7 +578,7 @@ bool position_in_array(int posx, int posy, int size){
     return true;
 }
 
-int random_num(int max){
+int random_num(int max){ // create a random int from 0 to max (not incluiding max)
     int r = Random.RandInt();
     r /= (32767/max)+1;
     return r;
@@ -667,17 +728,17 @@ int back_touch(int current){ // checks if back buttons are pressed
                 
         }
         if(x >= 2 && x <= 56 && y >= 2 && y <= 21){
-            return 0;
+            return 0; // of back buttons are pressed return 0
         }
     }
 
-    return current;
+    return current; // if back buttons not pressed, return current
 }
 
 int winner_touch(){
     int x, y;
     if(LCD.Touch(&x, &y)){
-        while(LCD.Touch(&x, &y)){
+        while(LCD.Touch(&x, &y)){ // wait for touch
 
         }
         if(x >= 88 && x <=232 && y >= 70 && y <= 110){
@@ -723,16 +784,19 @@ void Draw::menu(){ // draws the menu
 void Draw::statistics(){ // draws the statistics page
     LCD.Clear(BLACK);
 
+    int* stats; // get stats
+    stats = get_stats();
+
     FEHImage background;
     background.Open("background.png");
     background.Draw(0, 0);
 
     LCD.SetFontColor(WHITE);
     LCD.WriteAt("Statistics", 100, 5); // 10 characters
-    LCD.WriteAt("Fastest game won:Turn xx", 0, 45);
-    LCD.WriteAt("Slowest game won:Turn xx", 0, 85);
-    LCD.WriteAt("Fastest game lost:Turn xx", 0, 125);
-    LCD.WriteAt("Slowest game lost:Turn xx", 0, 165);
+    LCD.WriteAt("Fastest game won:Turn " + to_string(stats[0]), 0, 45); // write stats
+    LCD.WriteAt("Slowest game won:Turn " + to_string(stats[1]), 0, 85);
+    LCD.WriteAt("Fastest game lost:Turn " + to_string(stats[2]), 0, 125);
+    LCD.WriteAt("Slowest game lost:Turn " + to_string(stats[3]), 0, 165);
     
     LCD.SetFontColor(RED);
     LCD.WriteAt("BACK", 4, 5);
