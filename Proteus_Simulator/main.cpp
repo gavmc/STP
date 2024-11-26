@@ -240,7 +240,7 @@ int** place_player_pieces(){
     draw.board(temp_bot_board, current_player_board);
 
     int current_ship = 1; // start with ship #1
-    int x, y;
+    int x, y, x2, y2;
     
     
     while(true){
@@ -256,7 +256,7 @@ int** place_player_pieces(){
         bool double_click = false;
         int start = time(NULL);
         while(time(NULL) - start < .75){ // check for double touch
-            if(LCD.Touch(&x, &y)){
+            if(LCD.Touch(&x2, &y2)){
                 double_click = true;
             }
         }
@@ -793,7 +793,7 @@ void Draw::statistics(){ // draws the statistics page
 
     LCD.SetFontColor(WHITE);
     LCD.WriteAt("Statistics", 100, 5); // 10 characters
-    LCD.WriteAt("Fastest game won:Turn " + to_string(stats[0]), 0, 45); // write stats
+    LCD.WriteAt("Fastest game won:Turn " + to_string(stats[0]), 0, 45); // write stats to board
     LCD.WriteAt("Slowest game won:Turn " + to_string(stats[1]), 0, 85);
     LCD.WriteAt("Fastest game lost:Turn " + to_string(stats[2]), 0, 125);
     LCD.WriteAt("Slowest game lost:Turn " + to_string(stats[3]), 0, 165);
@@ -810,7 +810,7 @@ void Draw::credits(){ // draws the credits page
     background.Open("background.png");
     background.Draw(0, 0);
 
-    LCD.SetFontColor(WHITE);
+    LCD.SetFontColor(WHITE); // write credits to board
     LCD.WriteAt("Credits", 118, 5); // 7 characters
     LCD.WriteAt("Programmers", 94, 25); //11 characters
     LCD.WriteAt("Gavin Mclaughlan", 0, 48);
@@ -830,7 +830,7 @@ void Draw::instructions(){ //  draws the instructions page
     background.Open("background.png");
     background.Draw(0, 0);
 
-    LCD.SetFontColor(WHITE);
+    LCD.SetFontColor(WHITE); // write instructions to board
 	LCD.SetBackgroundColor(WHITE);
 	LCD.WriteAt("Instructions", 88, 5); //12 characters
     LCD.WriteAt("Pick a spot for your ships", 4, 35); //26 characters
@@ -844,7 +844,7 @@ void Draw::instructions(){ //  draws the instructions page
     LCD.DrawRectangle(2, 2, 54, 21);
 }
 
-void Draw::turn(int turn){
+void Draw::turn(int turn){ // draw name green for whoevers turn it is
     LCD.SetFontColor(GREEN);
     if(turn == 1){
         LCD.WriteAt("Computer",192, 45);
@@ -855,7 +855,7 @@ void Draw::turn(int turn){
     LCD.Update();
 }
 
-void Draw::winner(int winner){
+void Draw::winner(int winner){ // draw winner screen
     LCD.Clear(BLACK);
     LCD.SetFontColor(WHITE);
     if(winner == 1){
