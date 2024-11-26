@@ -4,8 +4,7 @@
 /// @note All future image loading should be done with .png files
 /// @author Adam Exley
 
-
-#include<FEHImages.h>
+#include <FEHImages.h>
 #include "FEHUtility.h"
 
 void FEHImage::Open(const char *filename)
@@ -20,23 +19,24 @@ void FEHImage::Open(const char *filename)
 	{
 		// Load image from file
 		tigr = tigrLoadImage(filename);
+		if (!tigr)
+		{
+			std::cout << CONSOLE_ERR("File [" << CONSOLE_BLUE(filename) << "] failed to open! Please check if it exists and is in the correct directory.\n");
+			return;
+		}
 	}
 	else
 	{
-		std::cout << CONSOLE_ERR("File [" << CONSOLE_BLUE(filename) << "] is not a valid image file! Please use a "<< CONSOLE_GREEN(".png")<< " file\n");
+		std::cout << CONSOLE_ERR("File [" << CONSOLE_BLUE(filename) << "] is not a valid image file! Please use a " << CONSOLE_GREEN(".png") << " file\n");
 		return;
 	}
-
 
 	// Check for images that are too large
 	if (tigr->w > LCD_WIDTH || tigr->h > LCD_HEIGHT)
 	{
 		std::cout << CONSOLE_ERR("Image [" << CONSOLE_BLUE(filename) << "] is too large! Please use an image smaller than " << CONSOLE_GREEN(LCD_WIDTH) << "x" << CONSOLE_GREEN(LCD_HEIGHT) << "\n");
 	}
-
-
 }
-
 
 // Legacy function to load .pic files
 // Filename is file output by MATLAB to draw. Should end in *FEH.pic
@@ -48,19 +48,17 @@ void FEHImage::OpenPic(const char *filename)
 	std::ifstream pic;
 	pic.open(filename);
 
-	//MATLAB outputs picture files in a rows by cols format
-	//User interface is completely in an x,y format
+	// MATLAB outputs picture files in a rows by cols format
+	// User interface is completely in an x,y format
 	if (pic.is_open())
 	{
 		pic >> h >> w;
 	}
-	else 
+	else
 		std::cout << "File: " << filename << " did not open!\n";
-
 
 	tigr = tigrBitmap(w, h);
 
-	
 	unsigned int tmp_c;
 
 	// Read image from data file
@@ -77,10 +75,16 @@ void FEHImage::OpenPic(const char *filename)
 	pic.close();
 }
 
-//x,y are top left location of where to draw picture
+// x,y are top left location of where to draw picture
 void FEHImage::Draw(int x, int y)
 {
-	// Draw image to LCD
-	tigrBlitAlpha(LCD.screen, tigr, x, y, 0, 0, tigr->w, tigr->h,1.0);
+	if (tigr)
+	{
+		// Draw image to LCD
+		tigrBlitAlpha(LCD.screen, tigr, x, y, 0, 0, tigr->w, tigr->h, 1.0);
+	}
+	else
+	{
+		std::cout << CONSOLE_ERR("FEHImage::Draw called without a file open.") << std::endl;
+	}
 }
-
