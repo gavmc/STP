@@ -32,7 +32,7 @@ bool position_in_array(int, int, int);
 
 int boat_sizes[] = {4, 3, 2, 1};
 
-
+// Penelope
 class Draw //class that contains all draw functions
 {
     public:
@@ -50,6 +50,7 @@ class Draw //class that contains all draw functions
     private:
 };
 
+// Gavin
 int main(){
     Draw draw;
     int choice = 0;
@@ -81,6 +82,7 @@ int main(){
     }
 }
 
+// Gavin
 int game_loop(){
     Draw draw;
 
@@ -168,7 +170,7 @@ int game_loop(){
 
     stats = get_stats();
 
-    if(winner == 2){
+    if(winner == 2){ // check stats
         if(turns[0] < stats[0]){
             stats[0] = turns[0];
         }
@@ -207,6 +209,7 @@ int game_loop(){
 
 }
 
+// Gavin
 int first_player(){ // choose a random first player
     int r = Random.RandInt();
     if (r > 16000){
@@ -215,6 +218,7 @@ int first_player(){ // choose a random first player
     return -1; // player 1 goes first
 }
 
+// Gavin
 int** place_player_pieces(){
     Draw draw;
     //place 4 pieces
@@ -319,6 +323,7 @@ int** place_player_pieces(){
 
 }
 
+// Gavin
 int** place_bot_pieces(){ // places the bot pieces randomly
     int** bot_b = 0;
 
@@ -395,6 +400,7 @@ int** place_bot_pieces(){ // places the bot pieces randomly
     }
 }
 
+// Gavin
 int check_winner(int bot_b[6][6], int player_b[6][6]){
     bool player_win = false;
     bool bot_win = true;
@@ -428,6 +434,7 @@ int check_winner(int bot_b[6][6], int player_b[6][6]){
     return 0;
 }
 
+// Gavin
 int* bot_move(int bot_vision[6][6]){
     int prob[6][6];
     int multiplier = 2;
@@ -508,6 +515,7 @@ int* bot_move(int bot_vision[6][6]){
     return pos; // return chosen spot
 }
 
+// Gavin
 int* player_move(int player_vision[6][6]){
     int board_left = 165;
     int board_right = 315;
@@ -539,6 +547,7 @@ int* player_move(int player_vision[6][6]){
     return pos; // return chose position
 }
 
+// Gavin
 int* get_stats(){
     ifstream file;
     file.open("stats.txt"); // open stats file
@@ -556,6 +565,7 @@ int* get_stats(){
     return stats; // return stats
 }
 
+// Gavin
 void put_stats(int stats[4]){
     ofstream file;
     file.open("stats.txt"); // open file
@@ -568,6 +578,7 @@ void put_stats(int stats[4]){
     file.close();
 }
 
+// Gavin
 bool position_in_array(int posx, int posy, int size){ // checks if a given position in inside an array of size by size
     if(posx < 0 || posx >= size){
         return false;
@@ -578,14 +589,17 @@ bool position_in_array(int posx, int posy, int size){ // checks if a given posit
     return true;
 }
 
+// Gavin
 int random_num(int max){ // create a random int from 0 to max (not incluiding max)
     int r = Random.RandInt();
     r /= (32767/max)+1;
     return r;
 }
 
+// Penelope
 Draw::Draw(){}
 
+// Penelope
 //draws BLANK grid
 void Draw::grid(){
     //draw two 6x6 grids
@@ -623,6 +637,7 @@ void Draw::grid(){
 
 }
 
+// Penelope
 //draw circle in corresponding grid slot
 void Draw::botShip(int i, int j, int value){
     //variables
@@ -644,7 +659,7 @@ void Draw::botShip(int i, int j, int value){
     LCD.FillCircle(x+height*i, y+width*j, radius);
 }
 
-
+// Penelope
 //draw circle in corresponding grid slot
 void Draw::playerShip(int i, int j, int value){
     //variables
@@ -666,6 +681,7 @@ void Draw::playerShip(int i, int j, int value){
     LCD.FillCircle(x+height*i, y+width*j, radius);
 }
 
+// Penelope
 //draw filled boards
 void Draw::board(int botBoard[6][6], int playerBoard[6][6]){
     //max x pixels -- 320
@@ -698,6 +714,7 @@ void Draw::board(int botBoard[6][6], int playerBoard[6][6]){
     LCD.Update();
 }   
 
+// Gavin
 int menu_touch(){ // checks to see if the menu buttons are touched
     int x, y;
     if(LCD.Touch(&x, &y)){
@@ -721,6 +738,7 @@ int menu_touch(){ // checks to see if the menu buttons are touched
     return 0; // no button touched
 }
 
+// Gavin
 int back_touch(int current){ // checks if back buttons are pressed
     int x, y;
     if(LCD.Touch(&x, &y)){
@@ -735,6 +753,7 @@ int back_touch(int current){ // checks if back buttons are pressed
     return current; // if back buttons not pressed, return current
 }
 
+// Gavin
 int winner_touch(){
     int x, y;
     if(LCD.Touch(&x, &y)){
@@ -752,6 +771,7 @@ int winner_touch(){
     return 0; // nothing pressed
 }
 
+// Penelope
 void Draw::menu(){ // draws the menu
     // draw title
     LCD.Clear(BLACK);
@@ -781,6 +801,7 @@ void Draw::menu(){ // draws the menu
     LCD.WriteAt("Credits", 117, 193);
 }
 
+// Penelope
 void Draw::statistics(){ // draws the statistics page
     LCD.Clear(BLACK);
 
@@ -803,6 +824,7 @@ void Draw::statistics(){ // draws the statistics page
     LCD.DrawRectangle(2, 2, 54, 21);
 }
 
+// Penelope
 void Draw::credits(){ // draws the credits page
     LCD.Clear(BLACK);
 
@@ -823,6 +845,7 @@ void Draw::credits(){ // draws the credits page
     LCD.DrawRectangle(2, 2, 54, 21);
 }
 
+// Penelope
 void Draw::instructions(){ //  draws the instructions page
     LCD.Clear(BLACK);
 
@@ -844,6 +867,7 @@ void Draw::instructions(){ //  draws the instructions page
     LCD.DrawRectangle(2, 2, 54, 21);
 }
 
+// Gavin
 void Draw::turn(int turn){ // draw name green for whoevers turn it is
     LCD.SetFontColor(GREEN);
     if(turn == 1){
@@ -855,6 +879,7 @@ void Draw::turn(int turn){ // draw name green for whoevers turn it is
     LCD.Update();
 }
 
+// Gavin
 void Draw::winner(int winner){ // draw winner screen
     LCD.Clear(BLACK);
     LCD.SetFontColor(WHITE);
